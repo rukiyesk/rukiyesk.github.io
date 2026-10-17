@@ -1,0 +1,695 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Kart sıralama etkinliği</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+:root{
+  --desk:#E2E6E3; --panel:#EEF1EF; --ink:#1D2A30; --ink-soft:#46545A; --line:#C3CCC8;
+  --paper:#FFFFFF; --paper-ink:#1D2A30; --paper-soft:#6A767B; --rule-blue:#D5E3EE; --rule-red:#E39494;
+  --focus:#2457C5; --error:#A3332B;
+  --g1:#4B4F9E; --g1-bg:#E4E5F3; --g2:#2B7A74; --g2-bg:#DAEEEB; --g3:#94650F; --g3-bg:#F3E7D0; --g4:#5F696E; --g4-bg:#E5E8E9;
+  --shadow:0 1px 0 rgba(29,42,48,.07), 0 8px 18px -8px rgba(29,42,48,.32);
+  --ui:"Atkinson Hyperlegible", "Segoe UI", system-ui, -apple-system, Roboto, Arial, sans-serif;
+  color-scheme:light;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --desk:#161C1B; --panel:#1F2725; --ink:#E5EAE7; --ink-soft:#A1AEAA; --line:#36423F;
+    --paper:#F3F1EA; --paper-ink:#1D2A30; --paper-soft:#5E6A6F; --rule-blue:#D0DCE6; --rule-red:#D68A8A;
+    --focus:#93B2FF; --error:#F08A80;
+    --g1:#A3A7EE; --g1-bg:rgba(163,167,238,.13); --g2:#6CC6BD; --g2-bg:rgba(108,198,189,.12);
+    --g3:#E3B25C; --g3-bg:rgba(227,178,92,.12); --g4:#AAB4B8; --g4-bg:rgba(170,180,184,.11);
+    --shadow:0 1px 0 rgba(0,0,0,.3), 0 10px 22px -8px rgba(0,0,0,.6);
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --desk:#161C1B; --panel:#1F2725; --ink:#E5EAE7; --ink-soft:#A1AEAA; --line:#36423F;
+  --paper:#F3F1EA; --paper-ink:#1D2A30; --paper-soft:#5E6A6F; --rule-blue:#D0DCE6; --rule-red:#D68A8A;
+  --focus:#93B2FF; --error:#F08A80;
+  --g1:#A3A7EE; --g1-bg:rgba(163,167,238,.13); --g2:#6CC6BD; --g2-bg:rgba(108,198,189,.12);
+  --g3:#E3B25C; --g3-bg:rgba(227,178,92,.12); --g4:#AAB4B8; --g4-bg:rgba(170,180,184,.11);
+  --shadow:0 1px 0 rgba(0,0,0,.3), 0 10px 22px -8px rgba(0,0,0,.6);
+  color-scheme:dark;
+}
+*,*::before,*::after{box-sizing:inherit}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--desk);color:var(--ink);font-family:var(--ui);font-size:18px;line-height:1.55;-webkit-font-smoothing:antialiased}
+button,input,textarea{font:inherit;color:inherit}
+:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
+.sr{position:absolute;top:0;left:0;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+img{max-width:100%}
+
+.btn{appearance:none;border:0;border-radius:10px;padding:.7em 1.15em;font-weight:700;cursor:pointer;line-height:1.2}
+.btn-primary{background:var(--ink);color:var(--desk)}
+.btn-primary:hover{filter:brightness(1.15)}
+.btn-quiet{background:transparent;color:var(--ink);box-shadow:inset 0 0 0 1.5px var(--line)}
+.btn-quiet:hover{box-shadow:inset 0 0 0 1.5px var(--ink-soft)}
+.btn[disabled]{opacity:.45;cursor:not-allowed}
+.link{background:none;border:0;padding:0;color:var(--ink-soft);text-decoration:underline;text-underline-offset:3px;cursor:pointer}
+
+/* ---------- index card ---------- */
+.icard{position:relative;display:flex;flex-direction:column;background:var(--paper);color:var(--paper-ink);border-radius:10px;box-shadow:var(--shadow);user-select:none;-webkit-user-select:none}
+.icard .meta{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:16px 22px 0;font-size:15px;color:var(--paper-soft)}
+.icard .txt{flex:1;display:flex;align-items:center;padding:12px 22px 26px;font-size:clamp(21px,2.2vw,25px);line-height:1.38;font-weight:700;letter-spacing:.003em;text-wrap:pretty}
+.icard.custom{box-shadow:var(--shadow),inset 0 0 0 2px var(--paper-soft)}
+.icard.custom .txt{font-style:italic;font-weight:400}
+
+/* ---------- welcome (tek ekrana sığar) ---------- */
+.welcome{min-height:calc(100dvh - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px));max-width:1180px;margin:0 auto;padding:clamp(16px,4vh,40px) 24px;display:grid;grid-template-columns:minmax(0,1.5fr) minmax(300px,.85fr);gap:clamp(24px,4vw,56px);align-items:center;align-content:center}
+.welcome h1{font-size:clamp(28px,1.6vw + 1.8vh,42px);line-height:1.12;letter-spacing:-.01em;margin:0 0 10px}
+.welcome .lede{font-size:18px;color:var(--ink-soft);max-width:58ch;margin:0 0 16px}
+.cats{margin:0 0 14px}
+.cats h2{font-size:16px;margin:0 0 8px}
+.cats dl{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:0}
+.cats div{background:var(--panel);border-radius:10px;padding:10px 14px 11px;border-top:4px solid var(--c)}
+.cats dt{font-weight:700;font-size:16.5px;line-height:1.3;margin-bottom:2px}
+.cats dd{margin:0;font-size:15px;line-height:1.4;color:var(--ink-soft)}
+.assure{margin:0;padding:8px 12px;border-left:3px solid var(--ink);background:var(--panel);border-radius:0 8px 8px 0;font-size:16px}
+.start{background:var(--panel);border-radius:14px;padding:24px;border:1px solid var(--line)}
+.field{margin-bottom:16px}
+.field > label,.field > .lbl{display:block;font-weight:700;margin-bottom:8px}
+.pid{width:100%;padding:.55em .8em;border-radius:10px;border:1.5px solid var(--line);background:var(--paper);color:var(--paper-ink);font-size:20px;letter-spacing:.04em}
+.pid:focus{border-color:var(--ink)}
+.depts{display:grid;gap:8px}
+.dept{position:relative;display:block;padding:12px 14px;border-radius:10px;border:1.5px solid var(--line);background:var(--desk);cursor:pointer;line-height:1.3}
+.dept input{position:absolute;opacity:0;pointer-events:none}
+.dept b{display:block;font-size:17px}
+.dept:has(input:checked){border-color:var(--ink);box-shadow:inset 0 0 0 1px var(--ink);background:var(--paper);color:var(--paper-ink)}
+.dept:has(input:focus-visible){outline:3px solid var(--focus);outline-offset:2px}
+.start .btn-primary{width:100%;padding:.8em 1em;font-size:18px}
+.err{color:var(--error);font-size:15px;margin-top:6px}
+.err:empty{display:none}
+.resume{margin:0 0 16px;padding:10px 12px;border-radius:10px;background:var(--desk);font-size:15px}
+@media (min-width:901px) and (max-height:720px){
+  .welcome h1{font-size:30px}
+  .welcome .lede{font-size:16.5px;margin-bottom:12px}
+  .cats dd{font-size:14.5px}
+  .cats div{padding:8px 12px 9px}
+  .start{padding:18px}
+}
+
+/* ---------- sort screen ---------- */
+.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:var(--panel);border-bottom:1px solid var(--line)}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--panel)}
+.top-in{max-width:1280px;margin:0 auto;padding:10px 20px;display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+.who{font-size:16px;color:var(--ink-soft);margin-right:auto}
+.who b{color:var(--ink)}
+.prog{display:flex;align-items:center;gap:10px;font-size:16px}
+.bar{width:140px;height:8px;border-radius:99px;background:var(--line);overflow:hidden}
+.bar i{display:block;height:100%;background:var(--ink);border-radius:99px;transition:width .25s}
+.top .btn{padding:.45em .9em;font-size:15px}
+
+.wrap{max-width:1280px;margin:0 auto;padding:22px 20px 40px}
+.stage{display:flex;flex-direction:column;align-items:center;gap:18px;margin-bottom:28px}
+.howto{font-size:17px;color:var(--ink-soft);max-width:58ch;text-align:center}
+.howto p{margin:0 0 4px}
+.deck-col{width:min(100%,460px)}
+.howto kbd{font-family:var(--ui);font-size:13px;padding:1px 6px;border-radius:5px;border:1px solid var(--line);background:var(--panel)}
+.side{display:flex;flex-direction:column;gap:10px;align-items:flex-start}
+.side small{color:var(--ink-soft);font-size:16px;line-height:1.45;max-width:32ch}
+
+.deck{position:relative;min-height:236px}
+.deck .stack{position:absolute;inset:0;border-radius:10px;background:var(--paper);box-shadow:var(--shadow);opacity:.9}
+.deck .stack.s1{transform:translate(6px,7px) rotate(1.4deg)}
+.deck .stack.s2{transform:translate(-5px,12px) rotate(-1.6deg)}
+.deck .top-card{position:relative;min-height:236px;cursor:grab;touch-action:none}
+.deck .top-card:active{cursor:grabbing}
+.deck .top-card.dim{opacity:.4}
+.deck .del{background:none;border:0;padding:4px 6px;color:var(--paper-ink);font-size:15px;text-decoration:underline;cursor:pointer;font-family:var(--ui)}
+@media (prefers-reduced-motion:no-preference){
+  .deck .top-card.enter{animation:enter .28s cubic-bezier(.2,.8,.2,1)}
+  @keyframes enter{from{transform:translateY(10px) rotate(-1.5deg);opacity:.2}}
+}
+.selnote{margin-top:12px;padding:12px 14px;border-radius:10px;background:var(--ink);color:var(--desk);font-size:16px;display:flex;gap:10px;align-items:center;justify-content:space-between}
+.selnote .link{color:var(--desk)}
+.done-panel{min-height:236px;border:2px dashed var(--line);border-radius:10px;padding:24px 22px;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:12px;text-align:center}
+.done-panel .acts{display:flex;flex-wrap:wrap;justify-content:center;gap:10px;margin-top:6px}
+.done-panel h2{margin:0;font-size:22px}
+.done-panel p{margin:0;color:var(--ink-soft);font-size:17px}
+
+.trays{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}
+.tray{display:flex;flex-direction:column;overflow:hidden;border-radius:12px;background:var(--bg);border:2px solid transparent;min-height:260px;transition:border-color .12s,background-color .12s}
+.tray.over,.tray.armed:hover{border-color:var(--c)}
+.tray.over{background:color-mix(in srgb,var(--bg) 60%,var(--c) 14%)}
+.tray-head{appearance:none;border:0;background:none;text-align:left;cursor:pointer;padding:16px 16px 12px;display:grid;grid-template-columns:1fr auto;gap:6px 12px;align-items:start;border-radius:10px 10px 0 0;color:var(--ink);border-top:5px solid var(--c)}
+.tray-head .name{font-weight:700;font-size:18px;line-height:1.28}
+.tray-head .count{font-size:26px;font-weight:700;color:var(--c);line-height:1}
+.tray-head .desc{grid-column:1/-1;font-size:15.5px;line-height:1.42;color:var(--ink-soft)}
+.tray-head kbd{font-family:var(--ui);font-size:13px;font-weight:400;padding:0 6px;border-radius:4px;border:1px solid var(--line);color:var(--ink-soft);margin-left:6px;vertical-align:2px}
+.tray-toggle{display:none;appearance:none;border:0;background:none;margin:0 10px 10px;padding:8px 6px;font-size:15px;font-weight:700;color:var(--ink);text-align:left;cursor:pointer;text-decoration:underline;text-underline-offset:3px}
+@media (hover:none){.tray-head kbd,.kbdhint{display:none}}
+.tray-body{flex:1;padding:4px 12px 14px;display:flex;flex-direction:column;gap:8px;cursor:pointer}
+.tray-empty{font-size:15px;color:var(--ink-soft);padding:8px 4px}
+.mini{appearance:none;border:0;text-align:left;width:100%;background:var(--paper);color:var(--paper-ink);border-radius:8px;padding:10px 12px 11px;font-size:16px;line-height:1.42;box-shadow:0 1px 0 rgba(29,42,48,.08),0 3px 6px -3px rgba(29,42,48,.25);cursor:pointer;user-select:none;-webkit-user-select:none;touch-action:manipulation}
+.mini.custom{font-style:italic;box-shadow:inset 0 0 0 1.5px var(--paper-soft)}
+.mini[aria-pressed="true"]{outline:3px solid var(--c);outline-offset:1px}
+.mini.dragging-src{opacity:.3}
+.mini:disabled{opacity:1;color:var(--paper-ink)}
+@media (prefers-reduced-motion:no-preference){
+  .mini.just{animation:land .45s cubic-bezier(.2,.8,.2,1)}
+  @keyframes land{from{transform:translateY(-14px) scale(1.04);box-shadow:0 12px 20px -8px rgba(29,42,48,.45)}}
+}
+.ghost{position:fixed;left:0;top:0;z-index:100;pointer-events:none;opacity:.95;box-shadow:0 18px 30px -10px rgba(0,0,0,.45)}
+body.is-dragging{cursor:grabbing}
+body.is-dragging *{cursor:grabbing !important}
+
+.foot{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-top:22px;flex-wrap:wrap;color:var(--ink-soft);font-size:14px}
+
+/* ---------- dialogs ---------- */
+dialog{border:0;border-radius:14px;padding:0;background:var(--panel);color:var(--ink);max-width:min(460px,calc(100vw - 32px));width:100%;box-shadow:0 30px 60px -20px rgba(0,0,0,.5)}
+dialog::backdrop{background:rgba(16,22,21,.45)}
+.dlg{padding:22px}
+.dlg h2{margin:0 0 6px;font-size:21px}
+.dlg p{margin:0 0 16px;color:var(--ink-soft);font-size:17px}
+.dlg .row{display:flex;gap:10px;justify-content:flex-end;margin-top:16px;flex-wrap:wrap}
+.blank{min-height:200px}
+.blank textarea{display:block;width:100%;min-height:130px;border:0;background:transparent;resize:none;padding:10px 22px 20px;font-size:21px;line-height:1.4;font-style:italic;color:var(--paper-ink)}
+.blank textarea:focus{outline:none}
+.blank:focus-within{outline:3px solid var(--focus);outline-offset:2px}
+
+/* ---------- done ---------- */
+.done{max-width:1180px;margin:0 auto;padding:clamp(24px,4vw,48px) 20px 48px}
+.done h1{font-size:clamp(28px,3.6vw,40px);margin:0 0 8px;line-height:1.15}
+.done .lede{color:var(--ink-soft);margin:0 0 26px;max-width:60ch}
+.done .trays .tray{min-height:0}
+.done .tray-head{cursor:default}
+.done .mini{cursor:default}
+.proto{margin-top:30px;border-top:1px solid var(--line);padding-top:18px}
+.proto summary{cursor:pointer;font-weight:700}
+.proto p{color:var(--ink-soft);font-size:15px;max-width:70ch}
+.proto pre{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:14px;overflow:auto;max-height:420px;font-size:13px;line-height:1.45}
+
+/* ---------- responsive ---------- */
+@media (max-width:1100px){
+  .kbdhint{display:none !important}
+}
+@media (max-width:900px){
+  .welcome{grid-template-columns:1fr;max-width:640px;gap:18px}
+  .trays{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media (max-width:640px){
+  body{font-size:17px}
+  .welcome{padding:12px 16px;gap:12px}
+  .welcome h1{font-size:25px;margin-bottom:6px}
+  .welcome .lede{font-size:15.5px;line-height:1.45;margin-bottom:10px}
+  .cats{margin-bottom:10px}
+  .cats h2{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+  .dur,.l1{display:none}
+  .cats dl{gap:6px}
+  .cats div{border-top:0;border-left:4px solid var(--c);padding:6px 11px 7px;border-radius:8px}
+  .cats dt{font-size:15px;line-height:1.3}
+  .cats dd{font-size:14px;line-height:1.35}
+  .assure{font-size:14.5px;padding:7px 11px}
+  .start{padding:0;border:0;background:none}
+  .dept{background:var(--panel)}
+  .field{margin-bottom:10px}
+  .field > label,.field > .lbl{margin-bottom:6px}
+  .pid{font-size:18px;padding:.45em .7em}
+  .dept{padding:9px 12px}
+  .dept b{font-size:15.5px}
+  .start .btn-primary{font-size:17px;padding:.7em 1em}
+  .stage{gap:12px;margin-bottom:18px}
+  .howto{font-size:16px}
+  .done-panel{padding:20px 16px}
+  .done-panel .acts .btn{flex:1 1 100%}
+  .tray-head{grid-template-columns:1fr auto}
+  .tray-toggle{margin:-4px 8px 8px}
+  .deck,.deck .top-card,.done-panel{min-height:168px}
+  .icard .meta{padding:14px 18px 0;font-size:14px}
+  .icard .txt{padding:10px 18px 22px;font-size:21px}
+  .trays{grid-template-columns:1fr;gap:10px}
+  .tray{min-height:0}
+  .tray-head{padding:13px 13px 10px;gap:4px 8px}
+  .tray-head .name{font-size:16.5px}
+  .tray-head .count{font-size:22px}
+  .tray-head .desc{font-size:14.5px}
+  .tray-head kbd{display:none}
+  .tray-toggle{display:block}
+  .tray-body{display:none}
+  .tray.open .tray-body{display:flex}
+  .done .tray-body{display:flex}
+  .done .tray-toggle{display:none}
+  .bar{width:72px}
+  .top-in{padding:8px 14px;gap:8px 12px}
+  .who{font-size:15px;flex-basis:100%}
+  .prog{margin-right:auto}
+  .wrap{padding:14px 14px 32px}
+  .cats dl{grid-template-columns:1fr}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none !important;animation:none !important}}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<div id="live" class="sr" aria-live="polite"></div>
+
+<dialog id="dlgBlank" aria-labelledby="blankTitle">
+  <form method="dialog" class="dlg" id="blankForm">
+    <h2 id="blankTitle">Boş karta yazın</h2>
+    <p>Listede olmayan ama yapay zekâ kullandığınız bir iş varsa buraya yazın. Kart destenin en üstüne eklenir.</p>
+    <div class="icard custom blank">
+      <div class="meta"><span>Sizin kartınız</span><span id="blankLeft"></span></div>
+      <label class="sr" for="blankText">Kartın metni</label>
+      <textarea id="blankText" maxlength="120" rows="4" placeholder="ör. Mülakata hazırlanmak"></textarea>
+    </div>
+    <div class="err" id="blankErr"></div>
+    <div class="row">
+      <button type="button" class="btn btn-quiet" id="blankCancel">Vazgeç</button>
+      <button type="submit" class="btn btn-primary" id="blankOk">Desteye ekle</button>
+    </div>
+  </form>
+</dialog>
+
+<dialog id="dlgFinish" aria-labelledby="finTitle">
+  <div class="dlg">
+    <h2 id="finTitle">Sıralamayı bitirmek istiyor musunuz?</h2>
+    <p>Bitirdikten sonra kartları taşıyamazsınız. Emin değilseniz gruplara bir kez daha göz atabilirsiniz.</p>
+    <div class="row">
+      <button type="button" class="btn btn-quiet" id="finCancel">Gruplara dön</button>
+      <button type="button" class="btn btn-primary" id="finOk">Sıralamayı bitir</button>
+    </div>
+  </div>
+</dialog>
+
+<script>
+(() => {
+"use strict";
+
+/* ===== İçerik (görüşme formundaki kart listesi) ===== */
+const GROUPS = [
+  { id: "ai",   label: "Sadece yapay zekâ kullanarak yapıyorum", desc: "Bu işi yapay zekâ yapıyor, ben sonucu kullanıyorum.", c: "--g1", key: "1" },
+  { id: "with", label: "Yapay zekâ ile birlikte yapıyorum", desc: "İşin bir kısmını ben yapıyorum, bir kısmında yapay zekâdan yardım alıyorum.", c: "--g2", key: "2" },
+  { id: "self", label: "Kendim yapıyorum", desc: "Bu işi yapay zekâ kullanmadan yapıyorum.", c: "--g3", key: "3" },
+  { id: "none", label: "Bu işi yapmıyorum", desc: "Derslerimde ve ödevlerimde bu işi yapmıyorum.", c: "--g4", key: "4" },
+];
+const DEPTS = [
+  { id: "YM",   label: "Yazılım Mühendisliği" },
+  { id: "BOTE", label: "Bilgisayar ve Öğretim Teknolojileri Eğitimi" },
+];
+// level: kartın Bloom/işlev grubu — öğrenciye gösterilmez, yalnızca analizde kullanılır
+const CARDS = [
+  ["K01","Bir kavramın tanımını bulmak","Hatırlama","all"],
+  ["K02","Bir fonksiyonun ya da komutun söz dizimini hatırlamak","Hatırlama","all"],
+  ["K03","Anlamadığım bir konuyu açıklatmak","Anlama","all"],
+  ["K04","Bir makaleyi ya da ders notunu özetletmek","Anlama","all"],
+  ["K05","Örnek bir çözümü kendi problemime uyarlamak","Uygulama","all"],
+  ["K06","Bir algoritmayı yeni bir veri yapısına uygulamak","Uygulama","all"],
+  ["K07","Kodumdaki hatayı bulmak","Analiz","all"],
+  ["K08","Bir veri setini analiz etmek","Analiz","all"],
+  ["K09","Kendi ödevime geri bildirim almak","Değerlendirme","all"],
+  ["K10","İki çözümden hangisinin daha iyi olduğuna karar vermek","Değerlendirme","all"],
+  ["K11","Bir program yazmak","Yaratma","all"],
+  ["K12","Proje fikri üretmek","Yaratma","all"],
+  ["K13","Bir yazılım tasarım belgesi hazırlamak","Alana özgü ürün (yaratma)","all"],
+  ["K14","Bir metnin ilk taslağını yazmak","Yazma","all"],
+  ["K15","Metnimin dilini ve anlatımını düzeltmek","Yazma","all"],
+  ["K16","Bir konuda kaynak bulmak","Bilgiye erişim","all"],
+  ["K17","İngilizce bir metni çevirmek","Bilgiye erişim","all"],
+  ["K18","Ders notlarımı düzenlemek","Bilgiyi düzenleme ve bellek","all"],
+  ["K19","Bir sunum hazırlamak","İletişim ve sunum","all"],
+  ["K20","Hocaya e-posta ya da ders forumuna mesaj yazmak","İletişim ve sunum","all"],
+  ["K21","Bir ders ya da proje için kendime öğrenme hedefi belirlemek","Öz düzenleme: hedef belirleme","all"],
+  ["K22","Ödevin benden ne istediğini anlamak","Öz düzenleme: görev analizi","all"],
+  ["K23","Çalışma planı yapmak","Öz düzenleme: planlama ve zaman yönetimi","all"],
+  ["K24","Bir konuyu ne kadar anladığımı görmek için kendime soru hazırlamak","Öz düzenleme: izleme","all"],
+  ["K25","Ödevde takıldığım bir adımı aşmanın yolunu bulmak","Öz düzenleme: yardım arama","all"],
+  ["K26","Bir işe başlamakta zorlandığımda kendimi harekete geçirmek","Öz düzenleme: motivasyon ve duygu","all"],
+  ["K27","Bir ödevi bitirdikten sonra neyi iyi yaptığımı, neyi geliştirmem gerektiğini değerlendirmek","Öz düzenleme: yansıtma","all"],
+  ["K28","Bir arkadaşıma geri bildirim yazmak","Sosyal","all"],
+  ["B01","Bir tasarım modelini kendi dersime uygulamak","Uygulama","BOTE"],
+  ["B02","Bir öğretim materyali hazırlamak","Alana özgü ürün (yaratma)","BOTE"],
+].map(([id,text,level,dept]) => ({ id, text, level, dept }));
+const MAX_BLANK = 3;
+
+/* ===== Durum ===== */
+const LS = "kartSiralama:v1:";
+let S = null;           // aktif oturum
+let selected = null;    // seçili yerleşmiş kart (null = destenin üstündeki kart)
+let justPlaced = null;
+let deckEnter = false;
+let lastFocus = null;
+const openTrays = new Set();
+
+const $ = (s, r = document) => r.querySelector(s);
+const esc = s => String(s).replace(/[&<>"']/g, ch => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[ch]));
+const gById = id => GROUPS.find(g => g.id === id);
+const store = {
+  get(k){ try { const v = localStorage.getItem(LS + k); return v ? JSON.parse(v) : null; } catch { return null; } },
+  set(k,v){ try { localStorage.setItem(LS + k, JSON.stringify(v)); } catch {} },
+  del(k){ try { localStorage.removeItem(LS + k); } catch {} },
+};
+const save = () => { if (S) { store.set("s:" + S.participant_id, S); store.set("current", S.participant_id); } };
+const announce = msg => { const l = $("#live"); l.textContent = ""; setTimeout(() => l.textContent = msg, 30); };
+const now = () => new Date().toISOString();
+const elapsed = () => S ? Date.now() - Date.parse(S.started_at) : 0;
+
+function card(id){
+  return CARDS.find(c => c.id === id) || (S && S.custom_cards.find(c => c.id === id)) || null;
+}
+function shuffle(a){ for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }
+
+function newSession(pid, dept){
+  const ids = shuffle(CARDS.filter(c => c.dept === "all" || c.dept === dept).map(c => c.id));
+  return {
+    schema: 1, participant_id: pid, department: dept,
+    started_at: now(), completed_at: null,
+    deck_order: ids.slice(), remaining: ids.slice(),
+    placements: {}, placed_at: {}, changes: {},
+    custom_cards: [], history: [], events: [],
+  };
+}
+const totalCards = () => S.deck_order.length + S.custom_cards.length;
+const placedCount = () => Object.keys(S.placements).length;
+
+/* ===== Eylemler ===== */
+function place(id, to){
+  const c = card(id); if (!c || !gById(to)) return;
+  const from = S.placements[id] ?? null;
+  if (from === to) { selected = null; render(); return; }
+  if (from === null) { S.remaining = S.remaining.filter(x => x !== id); deckEnter = true; }
+  else S.changes[id] = (S.changes[id] || 0) + 1;
+  S.placements[id] = to;
+  S.placed_at[id] = Date.now();
+  S.history.push({ id, from, to });
+  S.events.push({ t: elapsed(), type: from === null ? "place" : "move", card: id, from, to });
+  justPlaced = id; selected = null;
+  save(); render();
+  announce(`“${c.text}” kartı “${gById(to).label}” grubuna ${from === null ? "kondu" : "taşındı"}.`);
+}
+function undo(){
+  const h = S.history.pop(); if (!h) return;
+  if (!card(h.id)) return undo();
+  if (h.from === null) { delete S.placements[h.id]; delete S.placed_at[h.id]; S.remaining.unshift(h.id); deckEnter = true; }
+  else { S.placements[h.id] = h.from; S.changes[h.id] = Math.max(0, (S.changes[h.id] || 1) - 1); }
+  S.events.push({ t: elapsed(), type: "undo", card: h.id, from: h.to, to: h.from });
+  selected = null; save(); render();
+  announce(h.from === null ? "Son kart desteye geri kondu." : "Son taşıma geri alındı.");
+}
+function addBlank(text){
+  const id = "C" + (S.custom_cards.length + 1) + "-" + Date.now().toString(36).slice(-4);
+  S.custom_cards.push({ id, text, level: "Katılımcı kartı", dept: "custom", custom: true });
+  S.remaining.unshift(id);
+  S.events.push({ t: elapsed(), type: "add_blank", card: id, text });
+  deckEnter = true; selected = null; save(); render();
+  announce("Kartınız destenin en üstüne eklendi.");
+}
+function removeBlank(id){
+  S.custom_cards = S.custom_cards.filter(c => c.id !== id);
+  S.remaining = S.remaining.filter(x => x !== id);
+  S.events.push({ t: elapsed(), type: "remove_blank", card: id });
+  save(); render(); announce("Kart silindi.");
+}
+function finish(){
+  S.completed_at = now();
+  S.events.push({ t: elapsed(), type: "complete" });
+  save(); render();
+}
+function exportData(){
+  const all = [...S.deck_order.map(card), ...S.custom_cards];
+  return {
+    participant_id: S.participant_id,
+    department: S.department,
+    started_at: S.started_at,
+    completed_at: S.completed_at,
+    duration_sec: S.completed_at ? Math.round((Date.parse(S.completed_at) - Date.parse(S.started_at)) / 1000) : null,
+    presentation_order: S.deck_order,
+    sorts: all.map(c => ({
+      card_id: c.id, card_text: c.text, card_level: c.level,
+      is_custom: !!c.custom, group: S.placements[c.id] || null, changes: S.changes[c.id] || 0,
+    })),
+    events: S.events,
+  };
+}
+
+/* ===== Görünümler ===== */
+function render(){
+  const app = $("#app");
+  if (!S) app.innerHTML = viewWelcome();
+  else if (S.completed_at) app.innerHTML = viewDone();
+  else app.innerHTML = viewSort();
+  if (lastFocus) { const el = document.querySelector(lastFocus); if (el) el.focus({ preventScroll: true }); lastFocus = null; }
+  justPlaced = null; deckEnter = false;
+}
+
+function viewWelcome(){
+  const cur = store.get("current");
+  const pending = cur ? store.get("s:" + cur) : null;
+  const resume = pending && !pending.completed_at
+    ? `<div class="resume">Katılımcı <b>${esc(pending.participant_id)}</b> için yarım kalmış bir sıralama var. Aynı numarayı girerseniz kaldığınız yerden devam edersiniz.</div>` : "";
+  return `
+  <main class="welcome">
+    <div class="intro">
+      <h1>Öğrenirken yaptığınız işler ve yapay zekâ</h1>
+      <p class="lede"><span class="l1">Kartlarda, öğrenirken ve ödev yaparken yapılan işler yazıyor. </span>Her kartı, o işi genellikle nasıl yaptığınıza göre dört gruptan birine koyacaksınız. <span class="dur">Etkinlik yaklaşık 10–15 dakika sürer.</span></p>
+      <section class="cats" aria-labelledby="catsTitle">
+        <h2 id="catsTitle">Dört grup</h2>
+        <dl>${GROUPS.map(g => `<div style="--c:var(${g.c})"><dt>${esc(g.label)}</dt><dd>${esc(g.desc)}</dd></div>`).join("")}</dl>
+      </section>
+      <p class="assure">Doğru ya da yanlış cevap yok. Yanıtlarınız hiçbir derse ya da nota yansımaz.</p>
+    </div>
+    <form id="startForm" class="start" novalidate>
+      ${resume}
+      <div class="field">
+        <label for="pid">Katılımcı numaranız</label>
+        <input class="pid" id="pid" name="pid" inputmode="text" autocomplete="off" maxlength="12" placeholder="ör. 014" value="${pending && !pending.completed_at ? esc(pending.participant_id) : ""}">
+        <div class="err" id="pidErr"></div>
+      </div>
+      <fieldset class="field" style="border:0;padding:0;margin:0 0 16px">
+        <legend class="lbl" style="font-weight:700;margin-bottom:8px;padding:0">Bölümünüz</legend>
+        <div class="depts">
+          ${DEPTS.map(d => `<label class="dept"><input type="radio" name="dept" value="${d.id}" ${pending && !pending.completed_at && pending.department === d.id ? "checked" : ""}><b>${esc(d.label)}</b></label>`).join("")}
+        </div>
+        <div class="err" id="deptErr"></div>
+      </fieldset>
+      <button class="btn btn-primary" type="submit">Etkinliğe başla</button>
+    </form>
+  </main>`;
+}
+
+function viewSort(){
+  const total = totalCards(), placed = placedCount();
+  const pct = total ? Math.round(placed / total * 100) : 0;
+  const top = S.remaining[0] ? card(S.remaining[0]) : null;
+  const blankLeft = MAX_BLANK - S.custom_cards.length;
+  const sel = selected ? card(selected) : null;
+  const dept = DEPTS.find(d => d.id === S.department);
+
+  const deckHtml = top ? `
+    <div class="deck">
+      ${S.remaining.length > 2 ? `<div class="stack s2"></div>` : ""}
+      ${S.remaining.length > 1 ? `<div class="stack s1"></div>` : ""}
+      <div class="icard top-card ${top.custom ? "custom" : ""} ${sel ? "dim" : ""} ${deckEnter ? "enter" : ""}" data-card="${top.id}" data-source="deck" tabindex="0"
+           aria-label="Sıradaki kart: ${esc(top.text)}. Bir gruba koymak için 1–4 tuşlarını kullanın ya da gruba dokunun.">
+        <div class="meta"><span>${top.custom ? "Sizin kartınız" : "Sıradaki kart"}</span>
+          <span>${top.custom ? `<button class="del" data-del="${top.id}" type="button">Kartı sil</button>` : `${S.remaining.length} kart kaldı`}</span></div>
+        <div class="txt">${esc(top.text)}</div>
+      </div>
+    </div>` : `
+    <div class="done-panel">
+      <h2>Bütün kartları yerleştirdiniz</h2>
+      <p>${blankLeft ? `Listede olmayan ama yapay zekâ kullandığınız bir iş varsa boş karta yazabilirsiniz. ${blankLeft} boş kart kaldı.` : "Üç boş kartın hepsini kullandınız."}</p>
+      <p>Bir kartı başka gruba taşımak isterseniz karta dokunun.</p>
+      <div class="acts">
+        ${blankLeft ? `<button class="btn btn-quiet" id="btnBlank" type="button">Boş karta yaz</button>` : ""}
+        <button class="btn btn-primary" id="btnFinish" type="button">Sıralamayı bitir</button>
+      </div>
+    </div>`;
+
+  const selNote = sel ? `<div class="selnote" role="status"><span>“${esc(sel.text)}” seçildi. Taşımak için bir gruba dokunun.</span><button class="link" id="btnDesel" type="button">Vazgeç</button></div>` : "";
+
+  return `
+  <header class="top"><div class="top-in">
+    <div class="who">Katılımcı <b>${esc(S.participant_id)}</b>, ${esc(dept ? dept.label : S.department)}</div>
+    <div class="prog" aria-label="İlerleme"><div class="bar"><i style="width:${pct}%"></i></div><span>${placed} / ${total} kart</span></div>
+    <button class="btn btn-quiet" id="btnUndo" type="button" ${S.history.length ? "" : "disabled"}>Geri al</button>
+  </div></header>
+  <main class="wrap">
+    <section class="stage">
+      <div class="howto">
+        <p>Bu işi genellikle nasıl yaptığınızı düşünün ve kartı uygun gruba koyun.</p>
+        <p>Kartı sürükleyebilir ya da bir gruba dokunabilirsiniz. Yerleştirdiğiniz kartı sonradan başka gruba taşıyabilirsiniz.</p>
+        <p class="kbdhint">Klavye: <kbd>1</kbd>–<kbd>4</kbd> kartı gruba koyar.</p>
+      </div>
+      <div class="deck-col">${deckHtml}${selNote}</div>
+    </section>
+    <section class="trays" aria-label="Gruplar">${GROUPS.map(trayHtml).join("")}</section>
+    <div class="foot">
+      <span></span>
+      <button class="link" id="btnExit" type="button">Oturumu kapat</button>
+    </div>
+  </main>`;
+}
+
+function trayHtml(g, _, __, readonly = false){
+  const ids = Object.keys(S.placements).filter(id => S.placements[id] === g.id)
+    .sort((a, b) => (S.placed_at[b] || 0) - (S.placed_at[a] || 0));
+  const target = selected ? card(selected) : card(S.remaining[0]);
+  const armed = !readonly && target && S.placements[target.id] !== g.id;
+  const hint = readonly ? "" : selected ? (S.placements[selected] === g.id ? "Seçili kart bu grupta" : "Buraya taşı") : (target ? "Buraya koy" : "");
+  const minis = ids.length
+    ? ids.map(id => { const c = card(id); return `<button type="button" class="mini ${c.custom ? "custom" : ""} ${justPlaced === id ? "just" : ""}" data-card="${id}" data-source="tray" ${readonly ? "disabled" : `aria-pressed="${selected === id}"`}>${esc(c.text)}</button>`; }).join("")
+    : `<div class="tray-empty">${readonly ? "Bu grupta kart yok." : "Henüz kart yok."}</div>`;
+  const open = openTrays.has(g.id) || (selected && S.placements[selected] === g.id);
+  const toggle = !readonly && ids.length
+    ? `<button type="button" class="tray-toggle" data-toggle="${g.id}" aria-expanded="${!!open}">${open ? "Kartları gizle" : `Kartları göster (${ids.length})`}</button>` : "";
+  return `
+  <div class="tray ${armed ? "armed" : ""} ${open ? "open" : ""}" data-tray="${g.id}" style="--c:var(${g.c});--bg:var(${g.c}-bg)">
+    <button type="button" class="tray-head" data-target="${g.id}" ${readonly || !armed ? 'tabindex="-1"' : ""} aria-label="${esc(g.label)}: ${esc(g.desc)} ${ids.length} kart.${armed ? " " + hint : ""}">
+      <span class="name">${esc(g.label)}${readonly ? "" : `<kbd>${g.key}</kbd>`}</span>
+      <span class="count" aria-hidden="true">${ids.length}</span>
+      <span class="desc">${esc(g.desc)}</span>
+    </button>
+    <div class="tray-body" data-target="${readonly ? "" : g.id}">${minis}</div>
+    ${toggle}
+  </div>`;
+}
+
+function viewDone(){
+  const data = exportData();
+  return `
+  <main class="done">
+    <h1>Teşekkürler, sıralamanız tamamlandı</h1>
+    <p class="lede">Katılımcı ${esc(S.participant_id)}, ${placedCount()} kart. Görüşmenin devamında bu gruplar üzerinden konuşacağız; ekran açık kalabilir.</p>
+    <section class="trays" aria-label="Son sıralama">${GROUPS.map(g => trayHtml(g, 0, 0, true)).join("")}</section>
+    <details class="proto">
+      <summary>Araştırmacı için: kaydedilecek veri (prototip)</summary>
+      <p>Bu sürümde veriler yalnızca bu tarayıcıda tutulur. Veri tabanı bağlandığında aşağıdaki kayıt sunucuya gönderilecek.</p>
+      <pre>${esc(JSON.stringify(data, null, 2))}</pre>
+    </details>
+    <div class="foot" style="margin-top:26px">
+      <span></span>
+      <button class="btn btn-primary" id="btnNew" type="button">Yeni katılımcı başlat</button>
+    </div>
+  </main>`;
+}
+
+/* ===== Olaylar ===== */
+document.addEventListener("submit", e => {
+  if (e.target.id === "startForm") {
+    e.preventDefault();
+    const pid = $("#pid").value.trim();
+    const dept = (document.querySelector('input[name="dept"]:checked') || {}).value;
+    let ok = true;
+    $("#pidErr").textContent = ""; $("#deptErr").textContent = "";
+    if (!pid) { $("#pidErr").textContent = "Katılımcı numaranızı yazın. Numara size araştırmacı tarafından verildi."; ok = false; }
+    else if (!/^[A-Za-z0-9-]{1,12}$/.test(pid)) { $("#pidErr").textContent = "Numara yalnızca harf, rakam ve kısa çizgi içerebilir."; ok = false; }
+    if (!dept) { $("#deptErr").textContent = "Bölümünüzü seçin."; ok = false; }
+    if (!ok) { (pid ? document.querySelector('input[name="dept"]') : $("#pid")).focus(); return; }
+    const prev = store.get("s:" + pid);
+    if (prev && prev.department === dept && !prev.completed_at) S = prev;
+    else if (prev && prev.completed_at) { $("#pidErr").textContent = "Bu numarayla sıralama zaten tamamlanmış. Numaranızı araştırmacıyla kontrol edin."; $("#pid").focus(); return; }
+    else S = newSession(pid, dept);
+    S.events.push({ t: elapsed(), type: "session_open" });
+    save(); deckEnter = true; lastFocus = ".top-card"; render();
+    window.scrollTo(0, 0);
+  }
+  if (e.target.id === "blankForm") {
+    e.preventDefault();
+    const t = $("#blankText").value.trim().replace(/\s+/g, " ");
+    if (t.length < 3) { $("#blankErr").textContent = "Kartın metnini yazın."; return; }
+    $("#dlgBlank").close(); addBlank(t); lastFocus = ".top-card"; render();
+  }
+});
+
+let suppressClick = false;
+document.addEventListener("click", e => {
+  if (suppressClick) { suppressClick = false; return; }
+  const t = e.target;
+  if (t.closest("#btnUndo")) { undo(); return; }
+  if (t.closest("#btnDesel")) { selected = null; render(); return; }
+  if (t.closest("#btnBlank")) { $("#blankText").value = ""; $("#blankErr").textContent = ""; $("#blankLeft").textContent = `${MAX_BLANK - S.custom_cards.length} / ${MAX_BLANK}`; $("#dlgBlank").showModal(); $("#blankText").focus(); return; }
+  if (t.closest("#blankCancel")) { $("#dlgBlank").close(); return; }
+  if (t.closest("#btnFinish")) { $("#dlgFinish").showModal(); return; }
+  if (t.closest("#finCancel")) { $("#dlgFinish").close(); return; }
+  if (t.closest("#finOk")) { $("#dlgFinish").close(); finish(); window.scrollTo(0, 0); return; }
+  if (t.closest("#btnExit")) { save(); store.del("current"); S = null; selected = null; render(); return; }
+  if (t.closest("#btnNew")) { store.del("current"); openTrays.clear(); S = null; selected = null; render(); window.scrollTo(0, 0); return; }
+  const tg = t.closest("[data-toggle]");
+  if (tg) { const id = tg.dataset.toggle; openTrays.has(id) ? openTrays.delete(id) : openTrays.add(id); lastFocus = `[data-toggle="${id}"]`; render(); return; }
+  const del = t.closest("[data-del]"); if (del) { removeBlank(del.dataset.del); return; }
+  if (!S || S.completed_at) return;
+  const mini = t.closest(".mini[data-card]");
+  if (mini) { selected = selected === mini.dataset.card ? null : mini.dataset.card; lastFocus = `.mini[data-card="${selected || mini.dataset.card}"]`; render(); return; }
+  if (t.closest(".top-card") && selected) { selected = null; render(); return; }
+  const tgt = t.closest("[data-target]");
+  if (tgt && tgt.dataset.target) {
+    const id = selected || S.remaining[0];
+    if (id) { lastFocus = selected ? null : ".top-card"; place(id, tgt.dataset.target); }
+  }
+});
+
+document.addEventListener("keydown", e => {
+  if (!S || S.completed_at || document.querySelector("dialog[open]")) return;
+  if (e.target.matches("input,textarea")) return;
+  const g = GROUPS.find(g => g.key === e.key);
+  if (g) { const id = selected || S.remaining[0]; if (id) { e.preventDefault(); lastFocus = selected ? `.mini[data-card="${id}"]` : ".top-card"; place(id, g.id); } }
+  else if (e.key === "Escape" && selected) { selected = null; render(); }
+  else if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "z") { e.preventDefault(); undo(); }
+});
+
+/* Sürükle-bırak (fare, kalem ve dokunmatik; dokunmatikte yalnızca destedeki kart) */
+let drag = null;
+document.addEventListener("pointerdown", e => {
+  if (!S || S.completed_at || e.button !== 0) return;
+  const el = e.target.closest("[data-card]");
+  if (!el || e.target.closest("[data-del]")) return;
+  const fromDeck = el.dataset.source === "deck";
+  if (!fromDeck && e.pointerType === "touch") return;
+  drag = { id: el.dataset.card, el, x0: e.clientX, y0: e.clientY, pid: e.pointerId, started: false, over: null };
+});
+window.addEventListener("pointermove", e => {
+  if (!drag || e.pointerId !== drag.pid) return;
+  if (!drag.started) {
+    if (Math.hypot(e.clientX - drag.x0, e.clientY - drag.y0) < 7) return;
+    const r = drag.el.getBoundingClientRect();
+    drag.ox = drag.x0 - r.left; drag.oy = drag.y0 - r.top;
+    const gh = drag.el.cloneNode(true);
+    gh.classList.add("ghost"); gh.classList.remove("enter", "just");
+    gh.style.width = r.width + "px"; gh.removeAttribute("tabindex");
+    document.body.appendChild(gh);
+    drag.ghost = gh; drag.started = true;
+    drag.el.classList.add("dragging-src"); if (drag.el.classList.contains("top-card")) drag.el.style.opacity = ".25";
+    document.body.classList.add("is-dragging");
+  }
+  e.preventDefault();
+  drag.ghost.style.transform = `translate(${e.clientX - drag.ox}px, ${e.clientY - drag.oy}px) rotate(-2deg)`;
+  const under = document.elementFromPoint(e.clientX, e.clientY);
+  const tray = under && under.closest("[data-tray]");
+  const over = tray ? tray.dataset.tray : null;
+  if (over !== drag.over) {
+    document.querySelectorAll(".tray.over").forEach(t => t.classList.remove("over"));
+    if (tray) tray.classList.add("over");
+    drag.over = over;
+  }
+}, { passive: false });
+function endDrag(e, cancel){
+  if (!drag || (e && e.pointerId !== drag.pid)) return;
+  const d = drag; drag = null;
+  if (!d.started) return;
+  suppressClick = true; setTimeout(() => suppressClick = false, 0);
+  d.ghost.remove(); document.body.classList.remove("is-dragging");
+  d.el.classList.remove("dragging-src"); d.el.style.opacity = "";
+  document.querySelectorAll(".tray.over").forEach(t => t.classList.remove("over"));
+  if (!cancel && d.over) place(d.id, d.over);
+}
+window.addEventListener("pointerup", e => endDrag(e, false));
+window.addEventListener("pointercancel", e => endDrag(e, true));
+
+/* Açılış: yarım kalmış oturum varsa sürdür */
+const cur = store.get("current");
+const pending = cur ? store.get("s:" + cur) : null;
+if (pending && !pending.completed_at) S = pending;
+render();
+})();
+</script>
+</body>
+</html>
