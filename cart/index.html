@@ -702,7 +702,7 @@ function viewSurvey(){
   return `${topBar("Adım 1 / 2: Bilgi formu")}
   <main class="survey">
     <h1>Bilgi formu</h1>
-    <p class="lede">Bu sorular görüşme süresinden tasarruf etmek ve katılımcıların genel özelliklerini betimlemek için soruluyor. ${SURVEY.every(q => !q.required || q.type === "dept") ? "Bölüm sorusu dışındaki" : "Zorunlu olanlar dışındaki"} soruları yanıtlamak istemezseniz boş bırakabilirsiniz.</p>
+    <p class="lede">Bu sorular görüşme süresinden tasarruf etmek ve katılımcıların genel özelliklerini betimlemek için soruluyor. ${SURVEY.every(q => q.required) ? "Kart etkinliğine geçmek için tüm soruları yanıtlayın." : `${SURVEY.every(q => !q.required || q.type === "dept") ? "Bölüm sorusu dışındaki" : "Zorunlu olanlar dışındaki"} soruları yanıtlamak istemezseniz boş bırakabilirsiniz.`}</p>
     <form id="surveyForm" novalidate>
       ${SURVEY.map((q, i) => `
       <fieldset class="q">
