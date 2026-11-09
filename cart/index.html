@@ -67,6 +67,13 @@ button,input,textarea{font:inherit;color:inherit}
 .choice:has(input:checked){border-color:var(--ink);box-shadow:inset 0 0 0 1px var(--ink);background:var(--paper);color:var(--paper-ink)}
 .choice:has(input:focus-visible){outline:3px solid var(--focus);outline-offset:2px}
 .choice.long{font-weight:400}
+.field > .consent-check{display:flex;gap:12px;align-items:flex-start;margin:0;padding:12px 14px;border-radius:10px;border:1.5px solid var(--line);background:var(--desk);cursor:pointer;line-height:1.35;font-size:16.5px;font-weight:400}
+.consent-check input{flex:none;width:22px;height:22px;margin:1px 0 0;accent-color:var(--ink);cursor:pointer}
+.consent-check:has(input:checked){border-color:var(--ink);box-shadow:inset 0 0 0 1px var(--ink);background:var(--paper);color:var(--paper-ink)}
+.consent-check:has(input:focus-visible){outline:3px solid var(--focus);outline-offset:2px}
+.start-note{margin:8px 0 0;font-size:14.5px;color:var(--ink-soft);text-align:center}
+.start-note:empty{display:none}
+.decline-link{display:block;margin:14px auto 0;font-size:15px}
 
 /* ---------- index card ---------- */
 .icard{position:relative;display:flex;flex-direction:column;background:var(--paper);color:var(--paper-ink);border-radius:10px;box-shadow:var(--shadow);user-select:none;-webkit-user-select:none}
@@ -140,6 +147,10 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
 .pill span{display:inline-block;padding:9px 15px;border-radius:999px;border:1.5px solid var(--line);background:var(--desk);font-size:16px;line-height:1.25;cursor:pointer}
 .pill input:checked + span{background:var(--ink);color:var(--desk);border-color:var(--ink)}
 .pill input:focus-visible + span{outline:3px solid var(--focus);outline-offset:2px}
+.pill.custom span::after{content:"\00d7";margin-left:8px;font-weight:700}
+.tagadd{display:flex;gap:8px;margin-top:12px;align-items:stretch}
+.tagadd .txtin{margin-top:0;flex:1 1 auto;min-width:0}
+.tagadd .btn{flex:none}
 .qclear{display:none;margin-top:10px;font-size:14px}
 .q:has(input[type=radio]:checked) .qclear{display:inline-block}
 .txtin{width:100%;margin-top:12px;padding:.6em .8em;border-radius:10px;border:1.5px solid var(--line);background:var(--paper);color:var(--paper-ink);font-size:16px}
@@ -358,7 +369,7 @@ const CONSENT_HTML = `
 <h4>Araştırmanın Amacı ve Kapsamı</h4>
 <p>Bu araştırmanın amacı, üniversite öğrencilerinin ders ve ödev süreçlerinde yapay zekâ (YZ) araçlarını (ör. ChatGPT, Gemini, Claude, Copilot) nasıl ve neden kullandıklarını; hangi işleri YZ’ye bıraktıklarını, hangilerini YZ ile birlikte ya da kendileri yaptıklarını ve bu süreçte kendi öğrenmelerini nasıl planlayıp izlediklerini öğrencilerin kendi deneyimleri üzerinden anlamaktır. YZ’yi kullanıp kullanmamanız değil, nasıl ve neden kullandığınız merak edilmektedir; soruların doğru ya da yanlış cevabı yoktur. Bu kapsamda, siz gönüllü öğrencilerden önce kısa bir Görüşme Öncesi Bilgi Formu doldurmanız (ad-soyad ve öğrenci numarası istenmez), ardından bir araştırmacıyla yüz yüze ya da çevrimiçi, yarı yapılandırılmış bireysel bir görüşme yapmanız beklenmektedir. Görüşmede YZ’yi kullandığınız somut anlar hakkında sorular sorulacaktır. Ayrıca çevrimiçi bir sürükle-bırak uygulamasında, üzerinde öğrenme ve ödev sırasında yapılan bazı işlerin yazılı olduğu kartları dört gruba ayırmanız ve bunu yaparken düşüncelerinizi sesli olarak paylaşmanız istenecektir. Bu uygulamada adınız ya da herhangi bir kimlik bilginiz istenmez; etkinliğin sonunda yalnızca kartların son dizilimini gösteren ekranın görüntüsü alınacaktır. Görüşme, izin vermeniz halinde ses kaydına alınacak, izin vermemeniz halinde araştırmacı yazılı not tutacaktır. Görüntü kaydı yapılmayacaktır; çevrimiçi görüşmelerde de yalnızca ses kaydedilecek, kamera görüntüsü kaydedilmeyecektir. Görüşmeyi, dersinizi veren ya da notunuzu belirleyen bir öğretim elemanı yapmayacak; görüşmede anlattıklarınız hiçbir derse, nota ya da disiplin sürecine yansıtılmayacaktır.</p>
 <h4>Araştırmaya Katılacak Kişilerin Harcayacağı Süre</h4>
-<p>Araştırma kapsamında gönüllülerden Görüşme Öncesi Bilgi Formu’nu doldurmaları ve bireysel görüşmeye katılmaları beklenmektedir. Bilgi formunun doldurulması yaklaşık 3 dakika, görüşme ise yaklaşık 45 dakika sürecektir. Görüşme, sizin için uygun bir gün ve saatte, üniversitenizde sessiz bir ofis ya da toplantı odasında yüz yüze ya da çevrimiçi olarak tek oturumda gerçekleştirilecek olup görüşme sırasında istediğiniz zaman ara verebilirsiniz.</p>
+<p>Araştırma kapsamında gönüllülerden Görüşme Öncesi Bilgi Formu’nu doldurmaları ve bireysel görüşmeye katılmaları beklenmektedir. Bilgi formunun doldurulması yaklaşık 3 dakika, görüşme ise yaklaşık 45–60 dakika sürecektir. Görüşme, sizin için uygun bir gün ve saatte, üniversitenizde sessiz bir ofis ya da toplantı odasında yüz yüze ya da çevrimiçi olarak tek oturumda gerçekleştirilecek olup görüşme sırasında istediğiniz zaman ara verebilirsiniz.</p>
 <h4>Araştırmaya Katılacak Kişiler için Gönüllülük Esası</h4>
 <p>Bu araştırmaya katılmak tamamen gönüllülük esasına dayanmaktadır. Çalışmaya katılmama veya katıldıktan sonra herhangi bir anda çalışmadan çıkma hakkına sahipsiniz. Herhangi bir soruyu yanıtlamak zorunda değilsiniz; istemediğiniz soruyu geçebilir ya da ses kaydının durdurulmasını isteyebilirsiniz. Gönüllüler, araştırmaya katılmayı kabul etmediklerinde ya da araştırma sırasında vazgeçmeleri durumunda herhangi bir olumsuz sonuçla karşılaşmayacaktır; bu karar, derslerinizdeki akademik değerlendirmenizi hiçbir şekilde olumsuz etkilemeyecektir.</p>
 <p>Bu araştırmaya katılmanız için sizden herhangi bir ücret talep edilmeyecek ve katılımınız karşılığında size bir ödeme yapılmayacaktır. Çalışmadan elde edilecek bilgiler tamamen bilimsel araştırma amacı ile kullanılacaktır. Görüşme kayıtları yazıya dökülürken kimliğinizi ortaya çıkarabilecek bilgiler (adınız, öğretim elemanlarınızın ve arkadaşlarınızın adları vb.) çıkarılacak ve size yalnızca bir katılımcı kodu verilecektir. Ad-soyad bilginizin yer aldığı bu form, görüşme verilerinden ayrı tutularak gizli tutulacaktır. Verilere sadece araştırma ekibindeki araştırmacılar erişebilecektir.</p>
@@ -366,7 +377,7 @@ const CONSENT_HTML = `
 <p>Araştırma, düşük risk kategorisinde değerlendirilmektedir. Bu araştırmayla ilişkili bilinen fiziksel veya psikolojik bir risk bulunmamaktadır. Olası düşük düzeyli riskler; görüşme süresine bağlı hafif yorgunluk ile YZ kullanımı ve ödevlerle ilgili deneyimlerinizi anlatırken hafif bir rahatsızlık hissetme ile sınırlıdır.</p>
 <p>Olası riskleri en aza indirmek adına görüşmeyi dersinizi vermeyen bir araştırmacı yapacak; anlattıklarınız hiçbir şekilde notlandırılmayacak ya da yargılanmayacak, dilediğiniz soruyu yanıtlamayabilecek veya görüşmeyi sonlandırabileceksiniz. Ses kayıtları şifrelenerek güvenli bir şekilde saklanacak ve yazıya dökülüp doğrulandıktan sonra silinecektir; kimlik bilgilerinden arındırılmış görüşme dökümleri araştırmanın tamamlanmasından sonra 3 (üç) yıl süreyle şifreli olarak saklanacaktır. Ses kayıtlarının yazıya dökülmesinde verilerin yurt dışına aktarılmasına yol açan bulut tabanlı hizmetler kullanılmayacaktır. Kişisel verileriniz Kişisel Verilerin Korunması Kanunu’na uygun olarak işlenecektir.</p>
 <h4>Araştırmaya Dahil Olacak Toplam Gönüllü Sayısı</h4>
-<p>Araştırmaya, Ankara Üniversitesi Yazılım Mühendisliği ve Hacettepe Üniversitesi Bilgisayar ve Öğretim Teknolojileri Eğitimi bölümlerinden 15’er öğrenci olmak üzere toplam 30 gönüllü dahil edilecektir.</p>
+<p>Araştırmaya, Ankara Üniversitesi Yazılım Mühendisliği ve Hacettepe Üniversitesi Bilgisayar ve Öğretim Teknolojileri Eğitimi bölümlerinden 12–16’şar öğrenci olmak üzere toplam 24–32 gönüllü dahil edilecektir.</p>
 <p>Bu araştırmada yer almak tümüyle sizin isteğinize bağlıdır. Araştırmada yer almayı reddedebilirsiniz ya da başladıktan sonra yarıda bırakabilirsiniz. Bu araştırmanın sonuçları bilimsel amaçlarla kullanılacaktır. Araştırmadan çekilmeniz ya da araştırmacı tarafından araştırmadan çıkarılmanız halinde, ses kaydınız ve sizinle ilgili veriler silinecek ve kullanılmayacaktır. Ancak katılımcı kodu ile kimlik bilgileri arasındaki eşleştirme listesi veri analizi tamamlandığında imha edileceğinden, bu tarihten sonra belirli bir yanıtın size ait olduğunun tespit edilmesi mümkün olmayacak ve anonimleşmiş verilerin araştırmadan çıkarılması mümkün olmayabilir. Sizden elde edilen tüm bilgiler gizli tutulacak ve şifrelenerek saklanacaktır; araştırmada, yayınlarda ve sunumlarda kimliğiniz tamamen anonim kalacaktır. Araştırmayla ilgili sorularınız için Prof. Dr. Yasemin DEMİRASLAN ÇEVİK (yasemind@hacettepe.edu.tr) veya Dr. Öğr. Üyesi Rukiye SAVRAN KIZILTEPE (rukiyekiziltepe@ankara.edu.tr) ile iletişime geçebilirsiniz.</p>
 <h4>Gönüllü Katılımcı Onayı</h4>
 <p>Yukarıda yer alan ve araştırmaya başlamadan önce gönüllülere verilmesi gereken bilgileri içeren metni okudum (ya da sözlü olarak dinledim). Eksik kaldığını düşündüğüm konularda sorularımı araştırmacılara sordum ve yanıtlar aldım. Yazılı ve sözlü olarak tarafıma sunulan tüm açıklamaları ayrıntılarıyla anladığım kanısındayım. Çalışmaya katılmayı isteyip istemediğim konusunda karar vermem için yeterince zaman tanındı. 18 yaşını doldurmuş olduğumu beyan ederim.</p>
@@ -396,13 +407,13 @@ async function loadContent(){
   const [g, d, s, c] = await Promise.all(["groups", "departments", "survey_questions", "cards"].map(t => api(t + q)));
   GROUPS = g.map((x, i) => ({ id: x.id, label: x.label, desc: x.description, c: "--" + x.color, key: i < 9 ? String(i + 1) : "" }));
   DEPTS = d.map(x => ({ id: x.id, label: x.label }));
-  SURVEY = s.map(x => ({ id: x.id, q: x.question, type: x.type, opts: x.options || [], hint: x.hint, other: x.other_label || "Diğer", required: x.required || x.type === "dept", follow: x.follow && x.follow.id ? x.follow : null }));
+  SURVEY = s.map(x => ({ id: x.id, q: x.question, type: x.type, opts: x.options || [], hint: x.hint, other: x.other_label || (x.type === "tags" ? "Listede yoksa yazıp Enter’a basın" : "Diğer"), required: x.required || x.type === "dept", follow: x.follow && x.follow.id ? x.follow : null }));
   CARDS = c.map(x => ({ id: x.id, text: x.text, level: x.level, dept: x.dept }));
 }
 
 /* ===== Durum ===== */
 const LS = "egitimYZ:v3:";
-let S = null, draft = null, declined = false, boot = "loading", resetNotice = false, starting = false;
+let S = null, draft = null, declined = false, boot = "loading", resetNotice = false, starting = false, consentOk = false;
 let selected = null, justPlaced = null, deckEnter = false, lastFocus = null;
 const openTrays = new Set();
 
@@ -608,13 +619,12 @@ function viewWelcome(){
       ${resetNotice ? `<p class="resume">Önceki oturum araştırmacı tarafından kapatıldı. Yeni bir kodla başlayabilirsiniz.</p>` : ""}
       <fieldset class="field">
         <legend>Onam</legend>
-        <div class="choices">
-          <label class="choice long"><input type="radio" name="consent" value="yes">Bilgilendirme metnini okudum, 18 yaşını doldurdum ve araştırmaya kendi özgür irademle, gönüllü olarak katılıyorum.</label>
-          <label class="choice long"><input type="radio" name="consent" value="no">Katılmıyorum.</label>
-        </div>
+        <label class="consent-check"><input type="checkbox" id="consentChk" ${consentOk ? "checked" : ""}><span>Bilgilendirme metnini okudum, 18 yaşını doldurdum ve araştırmaya kendi özgür irademle, gönüllü olarak katılıyorum.</span></label>
         <div class="err" id="consentErr"></div>
       </fieldset>
-      <button class="btn btn-primary" type="submit" ${!draft || draft.error || starting ? "disabled" : ""}>Başla</button>
+      <button class="btn btn-primary" id="btnStart" type="submit" ${!consentOk || !draft || draft.error || starting ? "disabled" : ""}>Başla</button>
+      <p class="start-note" id="startNote">${consentOk ? "" : "Başlamak için yukarıdaki onay kutusunu işaretleyin."}</p>
+      <button class="link decline-link" id="btnDecline" type="button" ${!draft || draft.error || starting ? "disabled" : ""}>Katılmak istemiyorum</button>
     </form>
   </main>`;
 }
@@ -635,6 +645,14 @@ function pillsHtml(q, val){
   if (q.type === "text") {
     return `<label class="sr" for="q_${q.id}">${esc(q.q)}</label><input class="txtin" id="q_${q.id}" data-text="${q.id}" maxlength="300" value="${esc(val)}">`;
   }
+  if (q.type === "tags") {
+    return `<div class="pills" data-tagpills="${q.id}">${tagPillsHtml(q, val)}</div>
+      <div class="tagadd">
+        <label class="sr" for="${q.id}_tag">${esc(q.other)}</label>
+        <input class="txtin" id="${q.id}_tag" data-tagin="${q.id}" maxlength="${TAG_MAX}" autocomplete="off" placeholder="${esc(q.other)}">
+        <button class="btn btn-quiet" type="button" data-tagadd="${q.id}">Ekle</button>
+      </div>`;
+  }
   if (q.type === "multi") {
     const arr = (val && val.selected) || [];
     return `<div class="pills">${q.opts.map(o => `<label class="pill"><input type="checkbox" name="${q.id}" value="${esc(o)}" ${arr.includes(o) ? "checked" : ""}><span>${esc(o)}</span></label>`).join("")}</div>
@@ -644,6 +662,40 @@ function pillsHtml(q, val){
   return `<div class="pills">${q.opts.map(o => `<label class="pill"><input type="radio" name="${q.id}" value="${esc(o)}" ${val === o ? "checked" : ""}><span>${esc(o)}</span></label>`).join("")}</div>
     ${q.follow ? `<div class="follow ${val === q.follow.when ? "show" : ""}" data-follow="${q.id}"><label for="${q.follow.id}">${esc(q.follow.q)}</label><input class="txtin" id="${q.follow.id}" data-text="${q.follow.id}" maxlength="160" value="${esc(S.survey[q.follow.id])}"></div>` : ""}
     <button type="button" class="link qclear" data-clear="${q.id}">Yanıtı temizle</button>`;
+}
+
+// Etiket sorusu: hazır seçenekler ve öğrencinin eklediği etiketler aynı listede tutulur ({ selected: [...] }).
+// Yazılanlar hazır seçenekle ya da önceki etiketle büyük/küçük harf farkı gözetmeden eşleştirilir; böylece "chatgpt" ile "ChatGPT" ayrı sayılmaz.
+const TAG_MAX = 40, TAG_LIMIT = 15;
+const tagKey = t => t.toLocaleLowerCase("tr").replace(/[\s._-]+/g, "");
+function tagPillsHtml(q, val){
+  const arr = (val && val.selected) || [];
+  const extra = arr.filter(t => !q.opts.includes(t));
+  return q.opts.map(o => `<label class="pill"><input type="checkbox" name="${q.id}" value="${esc(o)}" ${arr.includes(o) ? "checked" : ""}><span>${esc(o)}</span></label>`).join("")
+    + extra.map(t => `<label class="pill custom" title="Kaldırmak için tıklayın"><input type="checkbox" name="${q.id}" value="${esc(t)}" checked><span>${esc(t)}</span></label>`).join("");
+}
+function refreshTags(q){
+  const box = $(`[data-tagpills="${q.id}"]`); if (box) box.innerHTML = tagPillsHtml(q, S.survey[q.id]);
+}
+function addTags(qid){
+  const q = SURVEY.find(x => x.id === qid), inp = $(`[data-tagin="${qid}"]`);
+  if (!q || !inp) return;
+  const cur = S.survey[qid] || { selected: [] };
+  const sel = cur.selected || [];
+  const added = [];
+  inp.value.split(/[,;\n]/).map(t => t.trim().replace(/\s+/g, " ").slice(0, TAG_MAX)).filter(t => t.length > 1).forEach(t => {
+    if (sel.length >= TAG_LIMIT) return;
+    const known = [...q.opts, ...sel].find(x => tagKey(x) === tagKey(t));
+    const v = known || t;
+    if (!sel.includes(v)) { sel.push(v); added.push(v); }
+  });
+  inp.value = "";
+  if (!added.length) return;
+  S.survey[qid] = { selected: sel };
+  refreshTags(q);
+  const er = $(`[data-err="${qid}"]`); if (er) er.textContent = "";
+  announce(added.join(", ") + " eklendi.");
+  save();
 }
 
 function viewSurvey(){
@@ -774,18 +826,13 @@ document.addEventListener("submit", e => {
   const f = e.target;
   if (f.id === "startForm") {
     e.preventDefault();
-    const consent = (f.querySelector('input[name="consent"]:checked') || {}).value;
     $("#consentErr").textContent = "";
-    if (!consent) { $("#consentErr").textContent = "Lütfen katılıp katılmadığınızı işaretleyin."; f.querySelector('input[name="consent"]').focus(); return; }
+    if (!consentOk) { $("#consentErr").textContent = "Başlamak için onay kutusunu işaretleyin."; $("#consentChk").focus(); return; }
     const d = draft;
     if (!d || d.error) return;
-    if (consent === "no") {
-      rpc("release_code", { p_code: d.code, p_token: d.token }).catch(() => {});
-      declined = true; draft = null; store.del("draft"); render(); return;
-    }
     starting = true; render();
     rpc("start_session", { p_code: d.code, p_token: d.token }).then(() => {
-      starting = false; draft = null; store.del("draft"); resetNotice = false;
+      starting = false; draft = null; store.del("draft"); resetNotice = false; consentOk = false;
       S = newSession(d.code, d.token);
       save(); render(); window.scrollTo(0, 0);
     }).catch(err => {
@@ -797,6 +844,7 @@ document.addEventListener("submit", e => {
   }
   if (f.id === "surveyForm") {
     e.preventDefault();
+    SURVEY.filter(q => q.type === "tags").forEach(q => { const i = $(`[data-tagin="${q.id}"]`); if (i && i.value.trim()) addTags(q.id); });
     if (hasDeptQ() && !S.department) { $("#deptErr").textContent = "Kartlar bölümünüze göre hazırlandığı için bu soruyu yanıtlamanız gerekiyor."; f.querySelector('input[name="department"]').focus(); return; }
     const missing = SURVEY.filter(q => q.required && q.type !== "dept" && !answered(q));
     f.querySelectorAll("[data-err]").forEach(el => el.textContent = "");
@@ -822,8 +870,18 @@ function answered(q){
   if (q.type === "dept") return !!S.department;
   const v = S.survey[q.id];
   if (q.type === "multi") return !!v && ((v.selected || []).length > 0 || !!(v.other || "").trim());
+  if (q.type === "tags") return !!v && (v.selected || []).length > 0;
   return typeof v === "string" && v.trim() !== "";
 }
+
+// Onam kutusu işaretlenince Başla etkinleşir
+document.addEventListener("change", e => {
+  if (e.target.id !== "consentChk") return;
+  consentOk = e.target.checked;
+  const b = $("#btnStart"); if (b) b.disabled = !consentOk || !draft || !!draft.error || starting;
+  const n = $("#startNote"); if (n) n.textContent = consentOk ? "" : "Başlamak için yukarıdaki onay kutusunu işaretleyin.";
+  const er = $("#consentErr"); if (er) er.textContent = "";
+});
 
 // Bilgi formu yanıtları her değişiklikte kaydedilir
 document.addEventListener("change", e => {
@@ -834,6 +892,18 @@ document.addEventListener("change", e => {
   if (q.type === "dept") {
     S.department = el.value; const w = $("#whoDept"); if (w) w.textContent = dById(el.value).label;
     $("#deptErr").textContent = ""; save(); return;
+  }
+  if (q.type === "tags") {
+    if (el.dataset.tagin) return;
+    const sel = ((S.survey[q.id] || {}).selected || []).slice();
+    if (el.checked) { if (!sel.includes(el.value)) sel.push(el.value); }
+    else sel.splice(sel.indexOf(el.value), 1);
+    // Hazır seçenekler listede kalır; öğrencinin eklediği etiket işareti kaldırılınca silinir
+    const ordered = [...q.opts.filter(o => sel.includes(o)), ...sel.filter(t => !q.opts.includes(t))];
+    if (ordered.length) S.survey[q.id] = { selected: ordered }; else delete S.survey[q.id];
+    if (!el.checked && !q.opts.includes(el.value)) refreshTags(q);
+    const er = $(`[data-err="${q.id}"]`); if (er) er.textContent = "";
+    save(); return;
   }
   if (q.type === "multi") {
     const cur = S.survey[q.id] || { selected: [], other: "" };
@@ -858,6 +928,14 @@ document.addEventListener("click", e => {
   if (t.closest("#cfCancel")) { $("#dlgConfirm").close(); cfAction = null; return; }
   if (t.closest("#cfOk")) { $("#dlgConfirm").close(); const a = cfAction; cfAction = null; if (a) a(); return; }
   if (t.closest("#btnBack")) { declined = false; render(); return; }
+  const tadd = t.closest("[data-tagadd]");
+  if (tadd && S) { addTags(tadd.dataset.tagadd); const i = $(`[data-tagin="${tadd.dataset.tagadd}"]`); if (i) i.focus(); return; }
+  if (t.closest("#btnDecline")) {
+    const d = draft;
+    if (!d || d.error || starting) return;
+    rpc("release_code", { p_code: d.code, p_token: d.token }).catch(() => {});
+    declined = true; consentOk = false; draft = null; store.del("draft"); render(); return;
+  }
   if (t.closest("#btnRetry")) { start(); return; }
   if (t.closest("#btnNew")) { if (S) syncNow(S); store.del("current"); openTrays.clear(); S = null; selected = null; render(); window.scrollTo(0, 0); return; }
   if (!S) return;
@@ -897,6 +975,18 @@ document.addEventListener("click", e => {
   if (tgt && tgt.dataset.target) {
     const id = selected || S.remaining[0];
     if (id) { lastFocus = selected ? null : ".top-card"; place(id, tgt.dataset.target); }
+  }
+});
+
+// Etiket kutusunda Enter ya da virgül etiketi ekler (formu göndermez)
+document.addEventListener("keydown", e => {
+  const el = e.target;
+  if (!S || S.stage !== "survey" || !el.dataset || !el.dataset.tagin) return;
+  if (e.key === "Enter" || e.key === ",") { e.preventDefault(); addTags(el.dataset.tagin); }
+  else if (e.key === "Backspace" && !el.value) {
+    const q = SURVEY.find(x => x.id === el.dataset.tagin), sel = ((S.survey[q.id] || {}).selected || []).slice();
+    const last = sel.filter(t => !q.opts.includes(t)).pop();
+    if (last) { sel.splice(sel.lastIndexOf(last), 1); if (sel.length) S.survey[q.id] = { selected: sel }; else delete S.survey[q.id]; refreshTags(q); announce(last + " kaldırıldı."); save(); }
   }
 });
 

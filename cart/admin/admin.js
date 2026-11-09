@@ -16,7 +16,9 @@ const EVENTS = {
   add_blank: "Boş kart ekledi", remove_blank: "Boş kartı sildi",
   complete: "Sıralamayı bitirdi", withdraw: "Oturumu sonlandırdı",
 };
-const QTYPES = { single: "Tek seçim", multi: "Çoklu seçim", text: "Kısa metin", dept: "Bölüm (kart destesini belirler)" };
+const QTYPES = { single: "Tek seçim", multi: "Çoklu seçim", tags: "Çoklu seçim + etiket ekleme", text: "Kısa metin", dept: "Bölüm (kart destesini belirler)" };
+// Etiket sorusunda yanıt { selected: [...] } biçimindedir: hazır seçenekler ve öğrencinin eklediği etiketler aynı listededir.
+const isList = q => q.type === "multi" || q.type === "tags";
 const COLORS = ["g1", "g2", "g3", "g4", "g5", "g6"];
 
 /* ===== Durum ===== */
@@ -116,6 +118,7 @@ function answeredQ(p, q){
   if (q.type === "dept") return !!p.department;
   const v = (p.survey || {})[q.id];
   if (q.type === "multi") return !!v && (((v.selected || []).length > 0) || !!String(v.other || "").trim());
+  if (q.type === "tags") return !!v && (v.selected || []).length > 0;
   return typeof v === "string" && v.trim() !== "";
 }
 function info(p){
@@ -137,6 +140,7 @@ function answerText(p, q){
   const v = (p.survey || {})[q.id];
   if (v == null) return "";
   if (q.type === "multi") return [...(v.selected || []), ...(String(v.other || "").trim() ? [`Diğer: ${v.other.trim()}`] : [])].join(", ");
+  if (q.type === "tags") return (v.selected || []).join(", ");
   let s = String(v);
   if (q.follow && q.follow.id && v === q.follow.when && p.survey[q.follow.id]) s += ` (${p.survey[q.follow.id]})`;
   return s;
@@ -324,13 +328,13 @@ function chartSurvey(base){
       return `<div class="mini-chart"><h4>${esc(q.question)}</h4><p class="muted" style="font-size:13.5px;margin:0">${vals.length} yazılı yanıt. Yanıtlar Excel çıktısında.</p></div>`;
     } else {
       const opts = [...(q.options || [])];
-      base.forEach(p => { const v = (p.survey || {})[q.id]; const arr = q.type === "multi" ? ((v && v.selected) || []) : (v != null ? [v] : []); arr.forEach(o => { if (!opts.includes(o)) opts.push(o); }); });
-      items = opts.map(o => ({ label: o, n: base.filter(p => { const v = (p.survey || {})[q.id]; return q.type === "multi" ? !!(v && (v.selected || []).includes(o)) : v === o; }).length }));
+      base.forEach(p => { const v = (p.survey || {})[q.id]; const arr = isList(q) ? ((v && v.selected) || []) : (v != null ? [v] : []); arr.forEach(o => { if (!opts.includes(o)) opts.push(o); }); });
+      items = opts.map(o => ({ label: o, n: base.filter(p => { const v = (p.survey || {})[q.id]; return isList(q) ? !!(v && (v.selected || []).includes(o)) : v === o; }).length }));
       if (q.type === "multi") items.push({ label: q.other_label || "Diğer", n: base.filter(p => { const v = (p.survey || {})[q.id]; return v && String(v.other || "").trim(); }).length });
     }
     const blank = base.filter(p => !answeredQ(p, q)).length;
     if (blank) items.push({ label: "Yanıtsız", n: blank });
-    return `<div class="mini-chart"><h4>${esc(q.question)}${q.type === "multi" ? ` <span class="muted" style="font-weight:400">(çoklu)</span>` : ""}</h4>${hbars(items, base.length)}</div>`;
+    return `<div class="mini-chart"><h4>${esc(q.question)}${isList(q) ? ` <span class="muted" style="font-weight:400">(çoklu)</span>` : ""}</h4>${hbars(items, base.length)}</div>`;
   }).join("")}</div>`;
 }
 
@@ -711,9 +715,9 @@ function contentForm(k, id){
         <label class="f"><span>Tür</span><select id="cType">${Object.entries(QTYPES).map(([v, l]) => `<option value="${v}" ${t === v ? "selected" : ""}>${l}</option>`).join("")}</select></label>
         <label class="chk" style="margin-top:28px"><input type="checkbox" id="cReq" ${r && r.required ? "checked" : ""}> Zorunlu soru</label>
       </div>
-      <label class="f" data-show="single multi"><span>Seçenekler</span><textarea id="cOpts" placeholder="Her satıra bir seçenek">${esc(r ? (r.options || []).join("\n") : "")}</textarea></label>
+      <label class="f" data-show="single multi tags"><span>Seçenekler</span><textarea id="cOpts" placeholder="Her satıra bir seçenek">${esc(r ? (r.options || []).join("\n") : "")}</textarea></label>
       <label class="f"><span>Açıklama (isteğe bağlı)</span><input type="text" id="cHint" maxlength="200" value="${esc(r ? r.hint : "")}"></label>
-      <label class="f" data-show="multi"><span>“Diğer” kutusunun etiketi</span><input type="text" id="cOther" maxlength="60" value="${esc(r ? r.other_label : "")}" placeholder="ör. Diğer araçlar (boş bırakılırsa “Diğer”)"></label>
+      <label class="f" data-show="multi tags"><span>“Diğer” / etiket kutusunun yazısı</span><input type="text" id="cOther" maxlength="60" value="${esc(r ? r.other_label : "")}" placeholder="ör. Diğer araçlar (boş bırakılırsa “Diğer”)"><small data-show="tags">Etiket sorusunda öğrenci listede olmayanları yazıp Enter’a basarak ekler; her etiket ayrı yanıt olarak kaydedilir.</small></label>
       <fieldset data-show="single" style="border:1px solid var(--line);border-radius:10px;padding:10px 12px 0;margin:0 0 12px">
         <legend style="font-weight:700;font-size:14.5px;padding:0 4px">Takip sorusu (isteğe bağlı)</legend>
         <div class="row2">
@@ -760,7 +764,7 @@ function contentForm(k, id){
       const type = $("#cType").value;
       const opts = $("#cOpts").value.split("\n").map(s => s.trim()).filter(Boolean);
       Object.assign(row, { question: $("#cQ").value.trim(), type, required: type === "dept" || $("#cReq").checked, hint: $("#cHint").value.trim() || null,
-        options: type === "single" || type === "multi" ? opts : [], other_label: type === "multi" ? ($("#cOther").value.trim() || null) : null, follow: null });
+        options: type === "single" || type === "multi" || type === "tags" ? opts : [], other_label: type === "multi" || type === "tags" ? ($("#cOther").value.trim() || null) : null, follow: null });
       if (!row.question) return err("Soru metnini yazın.");
       if ((type === "single" || type === "multi") && opts.length < 2) return err("En az iki seçenek yazın.");
       if (type === "dept" && D.survey.some(q => q.type === "dept" && q.id !== (r && r.id))) return err("Formda zaten bir “Bölüm” sorusu var.");
@@ -836,6 +840,11 @@ function rowsParticipants(list){
     "Son etkinlik": xlDate(p.last_seen_at),
   }; });
 }
+function tagCols(q, list){
+  const cols = [...(q.options || [])];
+  list.forEach(p => { const v = (p.survey || {})[q.id]; ((v && v.selected) || []).forEach(t => { if (!cols.includes(t)) cols.push(t); }); });
+  return cols;
+}
 function rowsSurvey(list){
   const qs = D.survey.filter(q => q.active || list.some(p => (p.survey || {})[q.id] !== undefined));
   return list.filter(p => p.started_at).map(p => {
@@ -846,6 +855,11 @@ function rowsSurvey(list){
       if (q.type === "multi") {
         (q.options || []).forEach(o => { r[`${q.id}: ${o}`] = v && (v.selected || []).includes(o) ? 1 : 0; });
         r[`${q.id}: ${q.other_label || "Diğer"}`] = (v && v.other) || "";
+      } else if (q.type === "tags") {
+        // Hazır seçenekler ve öğrencilerin eklediği her etiket ayrı 0/1 sütunu olur; ayrıca tümü tek hücrede listelenir.
+        const sel = (v && v.selected) || [];
+        tagCols(q, list).forEach(o => { r[`${q.id}: ${o}`] = sel.includes(o) ? 1 : 0; });
+        r[`${q.id} (tümü)`] = sel.join("; ");
       } else r[q.id] = v ?? "";
       if (q.follow && q.follow.id) r[q.follow.id] = (p.survey || {})[q.follow.id] || "";
     });
